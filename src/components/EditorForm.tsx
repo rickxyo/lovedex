@@ -199,7 +199,7 @@ export function EditorForm() {
                       onChange={(event) =>
                         updateField("partnerName", event.target.value)
                       }
-                      placeholder="Ex: Ana"
+                      placeholder="Ex: Sarah"
                       required
                     />
                   </Label>
