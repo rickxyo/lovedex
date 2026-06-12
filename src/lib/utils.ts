@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { parseLocalDate } from "@/lib/date";
 import { getRelationshipPace } from "@/lib/form-controls";
 import type { DurationParts, RelationshipStats } from "@/types/lovedex";
 
@@ -8,7 +9,11 @@ export function generateHash(): string {
   return nanoid(10);
 }
 
-export function getDaysTogether(startDate: Date): number {
+export function getDaysTogether(startDateValue: string | Date): number {
+  const startDate =
+    typeof startDateValue === "string"
+      ? parseLocalDate(startDateValue)
+      : startDateValue;
   const today = new Date();
   const startUtc = Date.UTC(
     startDate.getFullYear(),
@@ -38,7 +43,7 @@ export function formatDuration(days: number): DurationParts {
 }
 
 export function getRelationshipStats(
-  startDate: Date,
+  startDate: string | Date,
   city?: string
 ): RelationshipStats {
   const days = getDaysTogether(startDate);

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { PixelIcon } from "@/components/PixelIcon";
 import { PixelMascot } from "@/components/PixelMascot";
+import { formatLocalDate } from "@/lib/date";
 import { getDaysTogether, getRelationshipStats } from "@/lib/utils";
 import type { LoveDexTheme, LoveDexViewData } from "@/types/lovedex";
 
@@ -59,14 +60,6 @@ function normalizeTheme(theme: string): LoveDexTheme {
   return "rose";
 }
 
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  }).format(new Date(value));
-}
-
 export function LoveDexCard({
   lovedex,
   showExportButton = true
@@ -75,9 +68,11 @@ export function LoveDexCard({
   const [isExporting, setIsExporting] = useState(false);
   const theme = normalizeTheme(lovedex.theme);
   const classes = themeClasses[theme];
-  const startDate = new Date(lovedex.startDate);
-  const daysTogether = getDaysTogether(startDate);
-  const stats = getRelationshipStats(startDate, lovedex.city || undefined);
+  const daysTogether = getDaysTogether(lovedex.startDate);
+  const stats = getRelationshipStats(
+    lovedex.startDate,
+    lovedex.city || undefined
+  );
 
   async function exportCard() {
     if (!cardRef.current) {
@@ -155,7 +150,7 @@ export function LoveDexCard({
             <StatTile
               icon="calendar"
               label="Desde"
-              value={formatDate(lovedex.startDate)}
+              value={formatLocalDate(lovedex.startDate)}
               classes={classes}
             />
             <StatTile
