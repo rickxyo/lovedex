@@ -1,7 +1,8 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { SharePageClient } from "@/components/SharePageClient";
-import type { LoveDexViewData } from "@/types/lovedex";
+import { serializeLovedex } from "@/lib/lovedex";
+import { prisma } from "@/lib/prisma";
+import { getRequestBaseUrl } from "@/lib/request-url";
 
 type SharePageProps = {
   params: {
@@ -9,29 +10,14 @@ type SharePageProps = {
   };
 };
 
-function getRequestBaseUrl(): string {
-  const headerList = headers();
-  const host = headerList.get("host") || "localhost:3000";
-  const protocol = headerList.get("x-forwarded-proto") || "http";
-  return `${protocol}://${host}`;
-}
-
-async function getLovedex(hash: string): Promise<LoveDexViewData | null> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || getRequestBaseUrl();
-  const response = await fetch(`${baseUrl}/api/lovedex/${hash}`, {
-    cache: "no-store"
+async function getLovedex(hash: string) {
+  const lovedex = await prisma.loveDex.findUnique({
+    where: {
+      hash
+    }
   });
 
-  if (response.status === 404) {
-    return null;
-  }
-
-  if (!response.ok) {
-    throw new Error("Não foi possível carregar este Lovedex.");
-  }
-
-  return (await response.json()) as LoveDexViewData;
+  return lovedex ? serializeLovedex(lovedex) : null;
 }
 
 export default async function SharePage({ params }: SharePageProps) {
@@ -41,10 +27,9 @@ export default async function SharePage({ params }: SharePageProps) {
     notFound();
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || getRequestBaseUrl();
+  const baseUrl = getRequestBaseUrl();
   const publicPath = `/r/${params.hash}`;
-  const publicUrl = `${baseUrl}${publicPath}`;
+  const publicUrl = baseUrl ? `${baseUrl}${publicPath}` : publicPath;
 
   return (
     <main className="min-h-screen bg-tile px-4 py-8 sm:py-12">

@@ -39,11 +39,6 @@ export async function POST(request: Request) {
     }
 
     const hash = generateHash();
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") ||
-      request.headers.get("origin") ||
-      "http://localhost:3000";
-
     const lovedex = await prisma.loveDex.create({
       data: {
         hash,
@@ -61,7 +56,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       hash: lovedex.hash,
-      url: `${baseUrl}/r/${lovedex.hash}`
+      url: `/r/${lovedex.hash}`
     });
   } catch (error) {
     console.error("Erro ao criar Lovedex", error);
